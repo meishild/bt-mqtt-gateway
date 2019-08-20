@@ -39,7 +39,7 @@ class MithermometerWorker(BaseWorker):
       payload = {
         "unique_id": self.format_discovery_id(mac, name, attr),
         "name": self.format_discovery_name(name, attr),
-        "state_topic": self.format_topic(name, attr),
+        "state_topic": self.format_prefixed_topic(name, attr),
         "device_class": attr,
         "device": device
       }
@@ -65,6 +65,8 @@ class MithermometerWorker(BaseWorker):
         ret += self.update_device_state(name, data["poller"])
       except BluetoothBackendException as e:
         logger.log_exception(_LOGGER, "Error during update of %s device '%s' (%s): %s", repr(self), name, data["mac"], type(e).__name__, suppress=True)
+      except TimeoutError as e:
+        logger.log_exception(_LOGGER, "Time out during update of %s device '%s' (%s): %s", repr(self), name, data["mac"], type(e).__name__, suppress=True)
     return ret
 
   def update_device_state(self, name, poller):
