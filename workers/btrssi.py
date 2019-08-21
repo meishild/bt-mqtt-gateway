@@ -1,10 +1,11 @@
 from bluepy.btle import Scanner, DefaultDelegate
-from mqtt import MqttMessage
+from mqtt import MqttMessage, MqttConfigMessage
 
 from workers.base import BaseWorker
 import logger
 
 REQUIREMENTS = ['bluepy']
+monitoredAttrs = ["stat", "rssi_level", "rssi"]
 _LOGGER = logger.get(__name__)
 
 
@@ -22,6 +23,32 @@ class BtrssiWorker(BaseWorker):
         _LOGGER.info("Adding %d %s devices", len(self.devices), repr(self))
         for name, mac in self.devices.items():
             _LOGGER.debug("Adding %s device '%s' (%s)", repr(self), name, mac)
+
+    def config(self):
+        ret = []
+        for name, mac in self.devices.items():
+            ret += self.config_device(name, mac)
+        return ret
+
+    def config_device(self, name, mac):
+        ret = []
+        device = {
+            "identifiers": [mac, self.format_discovery_id(mac, name)],
+            "manufacturer": "bluetooth",
+            "model": "rssi",
+            "name": self.format_discovery_name(name)
+        }
+
+        for attr in monitoredAttrs:
+            payload = {
+                "unique_id": self.format_discovery_id(mac, name, attr),
+                "name": self.format_discovery_name(name, attr),
+                "state_topic": self.format_topic(name, attr),
+                "device_class": attr,
+                "device": device
+            }
+            ret.append(MqttConfigMessage(MqttConfigMessage.SENSOR, self.format_discovery_topic(mac, name, attr), payload=payload))
+        return ret
 
     def searchmac(self, devices, mac):
         for dev in devices:
