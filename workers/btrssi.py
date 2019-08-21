@@ -18,6 +18,19 @@ class ScanDelegate(DefaultDelegate):
             _LOGGER.debug("Discovered new device: %s" % dev.addr)
 
 
+def get_rssi_level(rssi):
+    if rssi > -85:
+        return 4
+    elif rssi > -95:
+        return 3
+    elif rssi > -105:
+        return 2
+    elif rssi > -115:
+        return 1
+    else:
+        return 0
+
+
 class BtrssiWorker(BaseWorker):
     def _setup(self):
         _LOGGER.info("Adding %d %s devices", len(self.devices), repr(self))
@@ -44,7 +57,6 @@ class BtrssiWorker(BaseWorker):
                 "unique_id": self.format_discovery_id(mac, name, attr),
                 "name": self.format_discovery_name(name, attr),
                 "state_topic": self.format_topic(name, attr),
-                "device_class": attr,
                 "device": device
             }
             ret.append(MqttConfigMessage(MqttConfigMessage.SENSOR, self.format_discovery_topic(mac, name, attr), payload=payload))
@@ -64,9 +76,12 @@ class BtrssiWorker(BaseWorker):
         for name, mac in self.devices.items():
             _LOGGER.info("Updating %s device '%s' (%s)", repr(self), name, mac)
             device = self.searchmac(devices, mac)
-            if device is None:
-                ret.append(MqttMessage(topic=self.format_topic(name + '/state'), payload="OFF"))
-            else:
-                ret.append(MqttMessage(topic=self.format_topic(name + '/rssi'), payload=device.rssi))
-                ret.append(MqttMessage(topic=self.format_topic(name + '/state'), payload="ON"))
+            for attr in monitoredAttrs:
+                if attr == 'stat':
+                    stat = 'ON' if device else 'OFF'
+                    ret.append(MqttMessage(topic=self.format_topic(name, attr), payload=stat))
+                if attr == 'rssi' and device is not None:
+                    ret.append(MqttMessage(topic=self.format_topic(name, attr), payload=device.rssi))
+                if attr == 'rssi_level' and device is not None:
+                    ret.append(MqttMessage(topic=self.format_topic(name, attr), payload=get_rssi_level(device.rssi)))
         return ret
