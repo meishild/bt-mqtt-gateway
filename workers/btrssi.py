@@ -21,11 +21,11 @@ class ScanDelegate(DefaultDelegate):
 def get_rssi_level(rssi):
     if rssi > -85:
         return 4
-    elif rssi > -95:
+    elif rssi > -90:
         return 3
-    elif rssi > -105:
+    elif rssi > -95:
         return 2
-    elif rssi > -115:
+    elif rssi > -100:
         return 1
     else:
         return 0
@@ -59,6 +59,8 @@ class BtrssiWorker(BaseWorker):
                 "state_topic": self.format_topic(name, attr),
                 "device": device
             }
+            if attr == 'rssi':
+                payload["unit_of_measurement"] = "dBm"
             ret.append(MqttConfigMessage(MqttConfigMessage.SENSOR, self.format_discovery_topic(mac, name, attr), payload=payload))
         return ret
 
