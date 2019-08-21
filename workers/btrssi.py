@@ -82,6 +82,7 @@ class BtrssiWorker(BaseWorker):
                     ret.append(MqttMessage(topic=self.format_topic(name, attr), payload=stat))
                 if attr == 'rssi' and device is not None:
                     ret.append(MqttMessage(topic=self.format_topic(name, attr), payload=device.rssi))
-                if attr == 'rssi_level' and device is not None:
-                    ret.append(MqttMessage(topic=self.format_topic(name, attr), payload=get_rssi_level(device.rssi)))
+                if attr == 'rssi_level':
+                    level = get_rssi_level(device.rssi) if device else -1
+                    ret.append(MqttMessage(topic=self.format_topic(name, attr), payload=level))
         return ret
