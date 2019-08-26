@@ -46,7 +46,6 @@ class MzbtirWorker(BaseWorker):
                 payload["unit_of_measurement"] = "%"
 
             ret.append(MqttConfigMessage(MqttConfigMessage.SENSOR, self.format_discovery_topic(mac, name, attr), payload=payload))
-
         return ret
 
     def status_update(self):
