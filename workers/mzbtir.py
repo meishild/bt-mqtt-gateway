@@ -161,8 +161,8 @@ class MZBtIr(object):
                     if str(ch.uuid) == SERVICE_UUID:
                         if p.writeCharacteristic(ch.getHandle(), b'\x55\x03' + bytes([self.get_sequence()]) + b'\x11', True):
                             data = ch.read()
-                            temp10 = int.from_bytes(data[6:8], byteorder='little')
-                            humi10 = int.from_bytes(data[4:6], byteorder='little')
+                            temp10 = int.from_bytes(data[4:6], byteorder='little')
+                            humi10 = int.from_bytes(data[6:8], byteorder='little')
                             self._temperature = float(temp10) / 100.0
                             self._humidity = float(humi10) / 100.0
                             if p.writeCharacteristic(ch.getHandle(), b'\x55\x03' + bytes([self.get_sequence()]) + b'\x10', True):
