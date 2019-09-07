@@ -61,6 +61,8 @@ class BtrssiWorker(BaseWorker):
             }
             if attr == 'rssi':
                 payload["unit_of_measurement"] = "dBm"
+            if attr == 'rssi_level':
+                payload["unit_of_measurement"] = "L"
             ret.append(MqttConfigMessage(MqttConfigMessage.SENSOR, self.format_discovery_topic(mac, name, attr), payload=payload))
         return ret
 
