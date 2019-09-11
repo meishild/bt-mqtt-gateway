@@ -1,11 +1,12 @@
-import logging
-
+from const import PER_DEVICE_TIMEOUT
+from exceptions import DeviceTimeoutError
 from mqtt import MqttMessage, MqttConfigMessage
+from interruptingcow import timeout
 
 from workers.base import BaseWorker
 import logger
 
-REQUIREMENTS = ['mithermometer', 'bluepy']
+REQUIREMENTS = ["mithermometer", "bluepy"]
 monitoredAttrs = ["temperature", "humidity", "battery"]
 _LOGGER = logger.get(__name__)
 
@@ -18,7 +19,10 @@ class MithermometerWorker(BaseWorker):
         _LOGGER.info("Adding %d %s devices", len(self.devices), repr(self))
         for name, mac in self.devices.items():
             _LOGGER.debug("Adding %s device '%s' (%s)", repr(self), name, mac)
-            self.devices[name] = {"mac": mac, "poller": MiThermometerPoller(mac, BluepyBackend)}
+            self.devices[name] = {
+                "mac": mac,
+                "poller": MiThermometerPoller(mac, BluepyBackend),
+            }
 
     def config(self):
         ret = []
@@ -32,7 +36,7 @@ class MithermometerWorker(BaseWorker):
             "identifiers": [mac, self.format_discovery_id(mac, name)],
             "manufacturer": "Xiaomi",
             "model": "LYWSD(CGQ/01ZM)",
-            "name": self.format_discovery_name(name)
+            "name": self.format_discovery_name(name),
         }
 
         for attr in monitoredAttrs:
@@ -41,18 +45,24 @@ class MithermometerWorker(BaseWorker):
                 "name": self.format_discovery_name(name, attr),
                 "state_topic": self.format_prefixed_topic(name, attr),
                 "device_class": attr,
-                "device": device
+                "device": device,
             }
 
-            if attr == 'temperature':
+            if attr == "temperature":
                 payload["unit_of_measurement"] = "°C"
-            elif attr == 'humidity':
+            elif attr == "humidity":
                 payload["unit_of_measurement"] = "%"
-            elif attr == 'battery':
+            elif attr == "battery":
                 payload["unit_of_measurement"] = "%"
 
             ret.append(
-                MqttConfigMessage(MqttConfigMessage.SENSOR, self.format_discovery_topic(mac, name, attr), payload=payload, retain=True))
+                MqttConfigMessage(
+                    MqttConfigMessage.SENSOR,
+                    self.format_discovery_topic(mac, name, attr),
+                    payload=payload,
+                    retain=True
+                )
+            )
 
         return ret
 
@@ -62,19 +72,39 @@ class MithermometerWorker(BaseWorker):
         for name, data in self.devices.items():
             _LOGGER.debug("Updating %s device '%s' (%s)", repr(self), name, data["mac"])
             from btlewrap import BluetoothBackendException
-            try:
-                ret += self.update_device_state(name, data["poller"])
-            except BluetoothBackendException as e:
-                logger.log_exception(_LOGGER, "Error during update of %s device '%s' (%s): %s", repr(self), name, data["mac"],
-                                     type(e).__name__, suppress=True)
-            except TimeoutError as e:
-                logger.log_exception(_LOGGER, "Time out during update of %s device '%s' (%s): %s", repr(self), name, data["mac"],
-                                     type(e).__name__, suppress=True)
-        return ret
 
+            try:
+                yield self.update_device_state(name, data["poller"])
+            except BluetoothBackendException as e:
+                logger.log_exception(
+                    _LOGGER,
+                    "Error during update of %s device '%s' (%s): %s",
+                    repr(self),
+                    name,
+                    data["mac"],
+                    type(e).__name__,
+                    suppress=True,
+                )
+            except DeviceTimeoutError as e:
+                logger.log_exception(
+                    _LOGGER,
+                    "Time out during update of %s device '%s' (%s)",
+                    repr(self),
+                    name,
+                    data["mac"],
+                    suppress=True,
+                )
+
+    @timeout(PER_DEVICE_TIMEOUT, DeviceTimeoutError)
     def update_device_state(self, name, poller):
         ret = []
         poller.clear_cache()
         for attr in monitoredAttrs:
-            ret.append(MqttMessage(topic=self.format_topic(name, attr), payload=poller.parameter_value(attr), retain=True))
+            ret.append(
+                MqttMessage(
+                    topic=self.format_topic(name, attr),
+                    payload=poller.parameter_value(attr),
+                    retain=True
+                )
+            )
         return ret
