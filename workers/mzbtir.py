@@ -45,7 +45,8 @@ class MzbtirWorker(BaseWorker):
             elif attr == 'battery':
                 payload["unit_of_measurement"] = "%"
 
-            ret.append(MqttConfigMessage(MqttConfigMessage.SENSOR, self.format_discovery_topic(mac, name, attr), payload=payload))
+            ret.append(
+                MqttConfigMessage(MqttConfigMessage.SENSOR, self.format_discovery_topic(mac, name, attr), payload=payload, retain=True))
         return ret
 
     def status_update(self):
@@ -64,7 +65,7 @@ class MzbtirWorker(BaseWorker):
     def update_device_state(self, name, mz):
         ret = []
         for attr in monitoredAttrs:
-            ret.append(MqttMessage(topic=self.format_topic(name, attr), payload=mz.parameter_value(attr)))
+            ret.append(MqttMessage(topic=self.format_topic(name, attr), payload=mz.parameter_value(attr), retain=True))
         return ret
 
     def on_command(self, topic, value):
