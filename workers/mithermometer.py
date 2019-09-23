@@ -44,7 +44,7 @@ class MithermometerWorker(BaseWorker):
                 "unique_id": self.format_discovery_id(mac, name, attr),
                 "name": self.format_discovery_name(name, attr),
                 "state_topic": self.format_prefixed_topic(name, attr),
-                # "availability_topic": self.format_prefixed_topic(name, attr),
+                "availability_topic": self.format_topic(name, "availability"),
                 "device_class": attr,
                 "device": device,
             }
@@ -99,15 +99,15 @@ class MithermometerWorker(BaseWorker):
                 )
                 self.fail_count = self.fail_count + 1
             finally:
-                # if self.fail_count > self.max_fail_count:
-                #     ret.append(
-                #         MqttMessage(
-                #             self.format_prefixed_topic(name, "availability"),
-                #             payload="offline",
-                #             retain=True
-                #         )
-                #     )
-                return ret
+                if self.fail_count > self.max_fail_count:
+                    ret.append(
+                        MqttMessage(
+                            self.format_prefixed_topic(name, "availability"),
+                            payload="offline",
+                            retain=True
+                        )
+                    )
+                    return ret
 
     @timeout(PER_DEVICE_TIMEOUT, DeviceTimeoutError)
     def update_device_state(self, name, poller):
@@ -121,10 +121,10 @@ class MithermometerWorker(BaseWorker):
                     retain=True
                 )
             )
-        # ret.append(
-        #     MqttMessage(
-        #         topic=self.format_topic(name, "availability"),
-        #         payload="online",
-        #         retain=True
-        #     ))
+        ret.append(
+            MqttMessage(
+                topic=self.format_topic(name, "availability"),
+                payload="online",
+                retain=True
+            ))
         return ret
