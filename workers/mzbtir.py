@@ -3,7 +3,7 @@ from workers.base import BaseWorker
 import logger
 
 REQUIREMENTS = ['bluepy']
-monitoredAttrs = ["temperature", "humidity", "battery", "availability"]
+monitoredAttrs = ["temperature", "humidity", "battery"]
 _LOGGER = logger.get(__name__)
 
 
@@ -67,7 +67,7 @@ class MzbtirWorker(BaseWorker):
                 if self.fail_count > self.max_fail_count:
                     ret.append(
                         MqttMessage(
-                            self.format_topic(name, "availability"),
+                            self.format_prefixed_topic(name, "available"),
                             payload="offline",
                             retain=True
                         )
@@ -164,7 +164,6 @@ class MZBtIr(object):
             return self._humidity
         elif attr == "battery":
             return self._battery
-        return "online"
 
     def update(self, force_update=False):
         if force_update or (self._last_update is None) or (datetime.now() - self._min_update_interval > self._last_update):

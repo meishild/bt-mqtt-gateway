@@ -115,7 +115,7 @@ class MifloraWorker(BaseWorker):
                 if self.fail_count > self.max_fail_count:
                     ret.append(
                         MqttMessage(
-                            self.format_topic(name, "availability"),
+                            self.format_prefixed_topic(name, "available"),
                             payload="offline",
                             retain=True
                         )
