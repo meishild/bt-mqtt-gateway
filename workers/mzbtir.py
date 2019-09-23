@@ -1,5 +1,9 @@
+from const import PER_DEVICE_TIMEOUT
+from exceptions import DeviceTimeoutError
 from mqtt import MqttMessage, MqttConfigMessage
 from workers.base import BaseWorker
+
+from interruptingcow import timeout
 import logger
 
 REQUIREMENTS = ['bluepy']
@@ -52,12 +56,13 @@ class MzbtirWorker(BaseWorker):
 
     def status_update(self):
         _LOGGER.info("Updating %d %s devices", len(self.devices), repr(self))
-        ret = []
+        ret = None
+
         for name, data in self.devices.items():
             _LOGGER.debug("Updating %s device '%s' (%s)", repr(self), name, data["mac"])
             from btlewrap import BluetoothBackendException
             try:
-                ret += self.update_device_state(name, data["mz"])
+                yield self.update_device_state(name, data["mz"])
                 self.fail_count = 0
             except BluetoothBackendException as e:
                 logger.log_exception(_LOGGER, "Error during update of %s device '%s' (%s): %s", repr(self), name, data["mac"],
@@ -72,9 +77,9 @@ class MzbtirWorker(BaseWorker):
                             retain=True
                         )
                     )
-                return ret
-        return ret
+                    return ret
 
+    @timeout(PER_DEVICE_TIMEOUT, DeviceTimeoutError)
     def update_device_state(self, name, mz):
         ret = []
         for attr in monitoredAttrs:
