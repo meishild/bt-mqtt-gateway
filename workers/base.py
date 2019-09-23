@@ -14,7 +14,7 @@ class BaseWorker:
         return
 
     def format_discovery_topic(self, mac, *sensor_args):
-        node_id = mac.replace(":", "")
+        node_id = mac.replace(":", "").lower()
         object_id = "_".join([repr(self), *sensor_args])
         return "{}/{}".format(node_id, object_id)
 
@@ -23,11 +23,12 @@ class BaseWorker:
             self.format_discovery_topic(mac, *sensor_args)
         )
 
-    def format_discovery_name(self, *sensor_args):
-        return "_".join([repr(self), *sensor_args])
+    def format_discovery_name(self, mac, *sensor_args):
+        node_id = mac.replace(":", "").lower()
+        return "_".join([node_id, *sensor_args])
 
     def format_topic(self, *topic_args):
-        return "/".join([self.topic_prefix, *topic_args])
+        return "/".join([self.global_topic_prefix, *topic_args])
 
     def format_prefixed_topic(self, *topic_args):
         topic = self.format_topic(*topic_args)

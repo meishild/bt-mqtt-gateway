@@ -36,7 +36,7 @@ class MzbtirWorker(BaseWorker):
         for attr in monitoredAttrs:
             payload = {
                 "unique_id": self.format_discovery_id(mac, name, attr),
-                "name": self.format_discovery_name(name, attr),
+                "name": "%s_%s" % (attr,),
                 "state_topic": self.format_topic(name, attr),
                 "availability_topic": self.format_topic(name, "availability"),
                 "device_class": attr,
