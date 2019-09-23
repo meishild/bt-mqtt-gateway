@@ -3,7 +3,7 @@ from workers.base import BaseWorker
 import logger
 
 REQUIREMENTS = ['bluepy']
-monitoredAttrs = ["temperature", "humidity", "battery"]
+monitoredAttrs = ["temperature", "humidity", "battery", "availability"]
 _LOGGER = logger.get(__name__)
 
 
@@ -57,9 +57,21 @@ class MzbtirWorker(BaseWorker):
             from btlewrap import BluetoothBackendException
             try:
                 ret += self.update_device_state(name, data["mz"])
+                self.fail_count = 0
             except BluetoothBackendException as e:
                 logger.log_exception(_LOGGER, "Error during update of %s device '%s' (%s): %s", repr(self), name, data["mac"],
                                      type(e).__name__, suppress=True)
+                self.fail_count = self.fail_count + 1
+            finally:
+                if self.fail_count > self.max_fail_count:
+                    ret.append(
+                        MqttMessage(
+                            self.format_topic(name, "availability"),
+                            payload="offline",
+                            retain=True
+                        )
+                    )
+                return ret
         return ret
 
     def update_device_state(self, name, mz):
@@ -149,7 +161,9 @@ class MZBtIr(object):
             return self._temperature
         elif attr == "humidity":
             return self._humidity
-        return self._battery
+        elif attr == "battery":
+            return self._battery
+        return "online"
 
     def update(self, force_update=False):
         if force_update or (self._last_update is None) or (datetime.now() - self._min_update_interval > self._last_update):

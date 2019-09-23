@@ -5,7 +5,7 @@ from workers.base import BaseWorker
 import logger
 
 REQUIREMENTS = ['bluepy']
-monitoredAttrs = ["stat", "rssi_level", "rssi"]
+monitoredAttrs = ["rssi_level", "rssi"]
 _LOGGER = logger.get(__name__)
 
 
@@ -81,9 +81,6 @@ class BtrssiWorker(BaseWorker):
             _LOGGER.info("Updating %s device '%s' (%s)", repr(self), name, mac)
             device = self.searchmac(devices, mac)
             for attr in monitoredAttrs:
-                if attr == 'stat':
-                    stat = 'ON' if device else 'OFF'
-                    ret.append(MqttMessage(topic=self.format_topic(name, attr), payload=stat))
                 if attr == 'rssi' and device is not None:
                     ret.append(MqttMessage(topic=self.format_topic(name, attr), payload=device.rssi))
                 if attr == 'rssi_level':

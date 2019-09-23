@@ -44,6 +44,7 @@ class MithermometerWorker(BaseWorker):
                 "unique_id": self.format_discovery_id(mac, name, attr),
                 "name": self.format_discovery_name(name, attr),
                 "state_topic": self.format_prefixed_topic(name, attr),
+                "availability_topic": self.format_available_topic(name, attr),
                 "device_class": attr,
                 "device": device,
             }
@@ -75,6 +76,7 @@ class MithermometerWorker(BaseWorker):
 
             try:
                 yield self.update_device_state(name, data["poller"])
+                self.fail_count = 0
             except BluetoothBackendException as e:
                 logger.log_exception(
                     _LOGGER,
@@ -85,6 +87,7 @@ class MithermometerWorker(BaseWorker):
                     type(e).__name__,
                     suppress=True,
                 )
+                self.fail_count = self.fail_count + 1
             except DeviceTimeoutError as e:
                 logger.log_exception(
                     _LOGGER,
@@ -94,6 +97,17 @@ class MithermometerWorker(BaseWorker):
                     data["mac"],
                     suppress=True,
                 )
+                self.fail_count = self.fail_count + 1
+            finally:
+                if self.fail_count > self.max_fail_count:
+                    ret.append(
+                        MqttMessage(
+                            self.format_topic(name, "availability"),
+                            payload="offline",
+                            retain=True
+                        )
+                    )
+                return ret
 
     @timeout(PER_DEVICE_TIMEOUT, DeviceTimeoutError)
     def update_device_state(self, name, poller):
@@ -107,4 +121,10 @@ class MithermometerWorker(BaseWorker):
                     retain=True
                 )
             )
+        ret.append(
+            MqttMessage(
+                topic=self.format_topic(name, "availability"),
+                payload="online",
+                retain=True
+            ))
         return ret

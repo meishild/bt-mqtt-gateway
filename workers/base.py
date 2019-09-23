@@ -2,6 +2,10 @@ class BaseWorker:
     def __init__(self, command_timeout, global_topic_prefix, **kwargs):
         self.command_timeout = command_timeout
         self.global_topic_prefix = global_topic_prefix
+        self.fail_count = 0
+        self.max_fail_count = 5
+        self.last_updated = None
+
         for arg, value in kwargs.items():
             setattr(self, arg, value)
         self._setup()
@@ -26,6 +30,12 @@ class BaseWorker:
         return "/".join([self.topic_prefix, *topic_args])
 
     def format_prefixed_topic(self, *topic_args):
+        topic = self.format_topic(*topic_args)
+        if self.global_topic_prefix:
+            return "{}/{}".format(self.global_topic_prefix, topic)
+        return topic
+
+    def format_available_topic(self, *topic_args):
         topic = self.format_topic(*topic_args)
         if self.global_topic_prefix:
             return "{}/{}".format(self.global_topic_prefix, topic)
