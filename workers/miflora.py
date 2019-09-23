@@ -36,7 +36,7 @@ class MifloraWorker(BaseWorker):
             "identifiers": [mac, self.format_discovery_id(mac, name)],
             "manufacturer": "Xiaomi",
             "model": "MiFlora",
-            "name": self.format_discovery_name(name),
+            "name": self.format_discovery_name(mac),
         }
 
         for attr in monitoredAttrs:
@@ -44,7 +44,7 @@ class MifloraWorker(BaseWorker):
                 "unique_id": self.format_discovery_id(mac, name, attr),
                 "state_topic": self.format_prefixed_topic(name, attr),
                 "availability_topic": self.format_prefixed_topic(name, "availability"),
-                "name": self.format_discovery_name(name, attr),
+                "name": self.format_discovery_name(mac, attr),
                 "device": device,
             }
 

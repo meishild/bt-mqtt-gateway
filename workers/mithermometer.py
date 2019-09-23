@@ -36,13 +36,13 @@ class MithermometerWorker(BaseWorker):
             "identifiers": [mac, self.format_discovery_id(mac, name)],
             "manufacturer": "Xiaomi",
             "model": "LYWSD(CGQ/01ZM)",
-            "name": self.format_discovery_name(name),
+            "name": self.format_discovery_name(mac),
         }
 
         for attr in monitoredAttrs:
             payload = {
                 "unique_id": self.format_discovery_id(mac, name, attr),
-                "name": self.format_discovery_name(name, attr),
+                "name": self.format_discovery_name(mac, attr),
                 "state_topic": self.format_prefixed_topic(name, attr),
                 "availability_topic": self.format_prefixed_topic(name, "availability"),
                 "device_class": attr,
