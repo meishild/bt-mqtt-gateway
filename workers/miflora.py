@@ -43,6 +43,7 @@ class MifloraWorker(BaseWorker):
             payload = {
                 "unique_id": self.format_discovery_id(mac, name, attr),
                 "state_topic": self.format_prefixed_topic(name, attr),
+                "availability_topic": self.format_available_topic(name, attr),
                 "name": self.format_discovery_name(name, attr),
                 "device": device,
             }

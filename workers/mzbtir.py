@@ -34,6 +34,7 @@ class MzbtirWorker(BaseWorker):
                 "unique_id": self.format_discovery_id(mac, name, attr),
                 "name": self.format_discovery_name(name, attr),
                 "state_topic": self.format_topic(name, attr),
+                "availability_topic": self.format_available_topic(name, attr),
                 "device_class": attr,
                 "device": device
             }
