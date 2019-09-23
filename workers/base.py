@@ -37,7 +37,9 @@ class BaseWorker:
 
     def format_available_topic(self, *topic_args):
         topic = self.format_topic(*topic_args)
-        return "available/{}".format( topic)
+        if self.global_topic_prefix:
+            return "{}/{}/available".format(self.global_topic_prefix, topic)
+        return topic
 
     def __repr__(self):
         return self.__module__.split(".")[-1]
