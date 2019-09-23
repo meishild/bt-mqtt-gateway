@@ -72,7 +72,7 @@ class MzbtirWorker(BaseWorker):
                 if self.fail_count > self.max_fail_count:
                     ret.append(
                         MqttMessage(
-                            self.format_prefixed_topic(name, "availability"),
+                            self.format_topic(name, "availability"),
                             payload="offline",
                             retain=True
                         )
@@ -85,14 +85,14 @@ class MzbtirWorker(BaseWorker):
         for attr in monitoredAttrs:
             ret.append(
                 MqttMessage(
-                    topic=self.format_prefixed_topic(name, attr),
+                    topic=self.format_topic(name, attr),
                     payload=mz.parameter_value(attr),
                     retain=True
                 )
             )
         ret.append(
             MqttMessage(
-                topic=self.format_prefixed_topic(name, "availability"),
+                topic=self.format_topic(name, "availability"),
                 payload="online",
                 retain=True
             )

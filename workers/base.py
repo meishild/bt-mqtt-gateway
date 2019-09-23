@@ -19,9 +19,7 @@ class BaseWorker:
         return "{}/{}".format(node_id, object_id)
 
     def format_discovery_id(self, mac, *sensor_args):
-        return "bt-mqtt-gateway/{}".format(
-            self.format_discovery_topic(mac, *sensor_args)
-        )
+        return "{}".format(self.format_discovery_topic(mac, *sensor_args))
 
     def format_discovery_name(self, mac, *sensor_args):
         node_id = mac.replace(":", "").lower()
