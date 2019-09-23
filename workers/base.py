@@ -14,7 +14,7 @@ class BaseWorker:
         return
 
     def format_discovery_topic(self, mac, *sensor_args):
-        node_id = mac.replace(":", "-")
+        node_id = mac.replace(":", "")
         object_id = "_".join([repr(self), *sensor_args])
         return "{}/{}".format(node_id, object_id)
 

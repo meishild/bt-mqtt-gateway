@@ -43,7 +43,7 @@ class MifloraWorker(BaseWorker):
             payload = {
                 "unique_id": self.format_discovery_id(mac, name, attr),
                 "state_topic": self.format_prefixed_topic(name, attr),
-                "availability_topic": self.format_available_topic(name, attr),
+                # "availability_topic": self.format_prefixed_topic(name, attr),
                 "name": self.format_discovery_name(name, attr),
                 "device": device,
             }
@@ -112,14 +112,14 @@ class MifloraWorker(BaseWorker):
                 )
                 self.fail_count = self.fail_count + 1
             finally:
-                if self.fail_count > self.max_fail_count:
-                    ret.append(
-                        MqttMessage(
-                            self.format_prefixed_topic(name, "available"),
-                            payload="offline",
-                            retain=True
-                        )
-                    )
+                # if self.fail_count > self.max_fail_count:
+                #     ret.append(
+                #         MqttMessage(
+                #             self.format_prefixed_topic(name, "availability"),
+                #             payload="offline",
+                #             retain=True
+                #         )
+                #     )
                 return ret
 
     @timeout(PER_DEVICE_TIMEOUT, DeviceTimeoutError)
@@ -134,10 +134,10 @@ class MifloraWorker(BaseWorker):
                     retain=True
                 )
             )
-        ret.append(
-            MqttMessage(
-                topic=self.format_topic(name, "availability"),
-                payload="online",
-                retain=True
-            ))
+        # ret.append(
+        #     MqttMessage(
+        #         topic=self.format_topic(name, "availability"),
+        #         payload="online",
+        #         retain=True
+        #     ))
         return ret
