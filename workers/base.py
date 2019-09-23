@@ -23,7 +23,7 @@ class BaseWorker:
 
     def format_discovery_name(self, mac, *sensor_args):
         node_id = mac.replace(":", "").lower()
-        return "_".join([node_id, *sensor_args])
+        return "_".join([*sensor_args, node_id])
 
     def format_topic(self, *topic_args):
         return "/".join([self.topic_prefix, *topic_args])
