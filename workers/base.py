@@ -28,7 +28,7 @@ class BaseWorker:
         return "_".join([node_id, *sensor_args])
 
     def format_topic(self, *topic_args):
-        return "/".join([self.global_topic_prefix, *topic_args])
+        return "/".join([self.topic_prefix, *topic_args])
 
     def format_prefixed_topic(self, *topic_args):
         topic = self.format_topic(*topic_args)
