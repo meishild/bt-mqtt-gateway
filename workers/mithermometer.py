@@ -44,7 +44,7 @@ class MithermometerWorker(BaseWorker):
                 "unique_id": self.format_discovery_id(mac, name, attr),
                 "name": self.format_discovery_name(name, attr),
                 "state_topic": self.format_prefixed_topic(name, attr),
-                "availability_topic": self.format_topic(name, "availability"),
+                "availability_topic": self.format_prefixed_topic(name, "availability"),
                 "device_class": attr,
                 "device": device,
             }
@@ -116,14 +116,14 @@ class MithermometerWorker(BaseWorker):
         for attr in monitoredAttrs:
             ret.append(
                 MqttMessage(
-                    topic=self.format_topic(name, attr),
+                    topic=self.format_prefixed_topic(name, attr),
                     payload=poller.parameter_value(attr),
                     retain=True
                 )
             )
         ret.append(
             MqttMessage(
-                topic=self.format_topic(name, "availability"),
+                topic=self.format_prefixed_topic(name, "availability"),
                 payload="online",
                 retain=True
             ))
