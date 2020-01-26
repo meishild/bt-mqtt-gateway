@@ -158,14 +158,6 @@ class MifloraWorker(BaseWorker):
                     retain=True
                 )
             )
-<<<<<<< HEAD
-        ret.append(
-            MqttMessage(
-                topic=self.format_topic(name, "availability"),
-                payload="online",
-                retain=True
-            ))
-=======
 
         # Low battery binary sensor
         ret.append(
@@ -175,5 +167,4 @@ class MifloraWorker(BaseWorker):
             )
         )
 
->>>>>>> 90273d09a89339593c6a519629e949ae27ecf766
         return ret
