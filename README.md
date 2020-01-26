@@ -17,6 +17,7 @@ See [Wiki](https://github.com/zewelor/bt-mqtt-gateway/wiki) for more information
 
 * [EQ3 Bluetooth smart thermostat](http://www.eq-3.com/products/eqiva/bluetooth-smart-radiator-thermostat.html) via [python-eq3bt](https://github.com/rytilahti/python-eq3bt)
 * [Xiaomi Mi Scale](http://www.mi.com/en/scale/)
+* [Xiaomi Mi Scale v2 (Body Composition Scale)](https://www.mi.com/global/mi-body-composition-scale)
 * [Linak Desk](https://www.linak.com/business-areas/desks/office-desks/) via [linak_bt_desk](https://github.com/zewelor/linak_bt_desk)
 * [MySensors](https://www.mysensors.org/)
 * [Xiaomi Mi Flora plant sensor](https://xiaomi-mi.com/sockets-and-sensors/xiaomi-huahuacaocao-flower-care-smart-monitor/) via [miflora](https://github.com/open-homeautomation/miflora)
@@ -25,6 +26,8 @@ See [Wiki](https://github.com/zewelor/bt-mqtt-gateway/wiki) for more information
 * [Oral-B connected toothbrushes](https://oralb.com/en-us/products#viewtype:gridview/facets:feature=feature-bluetooth-connectivity/category:products/page:0/sortby:Featured-Sort/productsdisplayed:undefined/promotilesenabled:undefined/cwidth:3/pscroll:)
 * [Switchbot](https://www.switch-bot.com/)
 * [Sensirion SmartGadget](https://www.sensirion.com/en/environmental-sensors/humidity-sensors/development-kit/) via [python-smartgadget](https://github.com/merll/python-smartgadget)
+* [RuuviTag](https://ruuvi.com/ruuvitag-specs/) via [ruuvitag-sensor](https://github.com/ttu/ruuvitag-sensor)
+* Xiaomi Mijia 2nd gen, aka LYWSD02
 
 ## Getting Started
 

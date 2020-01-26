@@ -6,8 +6,18 @@ from interruptingcow import timeout
 from workers.base import BaseWorker
 import logger
 
-REQUIREMENTS = ["miflora", "bluepy"]
-monitoredAttrs = ["temperature", "moisture", "light", "conductivity", "battery"]
+REQUIREMENTS = [
+    # Reference specific commit to include the transitive dependency
+    # btlewrap in version 0.0.9. This should be reverted to just
+    # "miflora" once miflora version > 0.6 is available on pypi.
+    "git+https://github.com/open-homeautomation/miflora.git@ebda66d1f4ba71bc0b98f8383280e59302b40fc8#egg=miflora",
+    "bluepy"
+]
+
+ATTR_BATTERY = "battery"
+ATTR_LOW_BATTERY = 'low_battery'
+
+monitoredAttrs = ["temperature", "moisture", "light", "conductivity", ATTR_BATTERY]
 _LOGGER = logger.get(__name__)
 
 
@@ -64,7 +74,7 @@ class MifloraWorker(BaseWorker):
                 payload.update(
                     {"device_class": "temperature", "unit_of_measurement": "°C"}
                 )
-            elif attr == "battery":
+            elif attr == ATTR_BATTERY:
                 payload.update({"device_class": "battery", "unit_of_measurement": "%"})
 
             ret.append(
@@ -75,6 +85,20 @@ class MifloraWorker(BaseWorker):
                     retain=True
                 )
             )
+
+        ret.append(
+            MqttConfigMessage(
+                MqttConfigMessage.BINARY_SENSOR,
+                self.format_discovery_topic(mac, name, ATTR_LOW_BATTERY),
+                payload={
+                    "unique_id": self.format_discovery_id(mac, name, ATTR_LOW_BATTERY),
+                    "state_topic": self.format_prefixed_topic(name, ATTR_LOW_BATTERY),
+                    "name": self.format_discovery_name(name, ATTR_LOW_BATTERY),
+                    "device": device,
+                    "device_class": "battery",
+                },
+            )
+        )
 
         return ret
 
@@ -134,10 +158,22 @@ class MifloraWorker(BaseWorker):
                     retain=True
                 )
             )
+<<<<<<< HEAD
         ret.append(
             MqttMessage(
                 topic=self.format_topic(name, "availability"),
                 payload="online",
                 retain=True
             ))
+=======
+
+        # Low battery binary sensor
+        ret.append(
+            MqttMessage(
+                topic=self.format_topic(name, ATTR_LOW_BATTERY),
+                payload=self.true_false_to_ha_on_off(poller.parameter_value(ATTR_BATTERY) < 10),
+            )
+        )
+
+>>>>>>> 90273d09a89339593c6a519629e949ae27ecf766
         return ret
